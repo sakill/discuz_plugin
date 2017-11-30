@@ -1,0 +1,111 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=gbk">
+    <meta http-equiv="x-ua-compatible" content="ie=7" />
+    <script src="template/damei_c7/image/js/jquery-1.8.3.min.js" type="text/javascript"></script>
+    <link href="static/image/admincp/admincp.css?ve5" rel="stylesheet" type="text/css" />
+</head>
+<body>
+<div id="append_parent"></div><div id="ajaxwaitid"></div>
+    <table class="tb tb2 ">
+        <tr><th colspan="15" class="partition">会员申请信息</th></tr>
+        <tr class="header"><th></th><th>手机号</th><th>真实姓名</th><th>贷款金额</th><th>居住地</th><th>时间</th><th>操作</th></tr>
+        {loop $data $onedata}
+        <tr class="hover"><td><input class="checkbox" type="checkbox" name="delete[]" value="{$onedata['id']}" data-type="false" onclick="collect(this)"></td><td>{$onedata['mobile']}</td><td>{$onedata['name']}</td><td>{$onedata['amount']}</td><td>{$onedata['address']}</td><td>{$onedata['date']}</td><td>[<a href="admin.php?action=plugins&operation=config&do=109&identifier=bc_jiedai&pmod=admin&id={$onedata['id']}&delete=1"><font color="#FF0000">删除</font></a>]</td></tr>
+        {/loop}
+        <tr><td><input type="checkbox" name="chkall" id="chkallQeNU" class="choose-all" onclick="all_collect()">
+        </td><td><a href="javascript:void(0);" onclick="del()">删除</a> <a href="admin.php?action=plugins&operation=config&do=109&identifier=bc_jiedai&pmod=admin&dc=1">全部导出</a></td><td colspan="13"><div class="cuspages right"><div class="pg">{$page}</div></div><div class="fixsel"></div></td></tr>
+    </table>
+
+<script>
+    //单击收藏
+    function collect(that){
+        if($(that).attr("data-type") === "false"){
+            $(that).attr("data-type","true");
+        }else{
+            $(that).attr("data-type","false");
+        }
+
+        var i = 0;
+        $(".checkbox").each(function(){
+            if($(this).attr("data-type") === "false"){
+                $(".choose-all").attr("data-type","false");
+                $(".choose-all").attr("checked",false);
+                i++;
+            }
+        });
+
+        if(i==0){
+            $(".choose-all").attr("checked",true);
+            $(".choose-all").attr("data-type","true");
+        }
+    }
+
+
+    //所有收藏
+    function all_collect(){
+        if($(".choose-all").attr("data-type") === "false"){
+            $(".choose-all").attr("checked",true);
+            $(".choose-all").attr("data-type","true");
+            $(".checkbox").each(function(){ 
+                $(this).attr("checked",true);
+                $(this).attr("data-type","true");
+            });
+        }else{
+            $(".choose-all").attr("checked",false);
+            $(".choose-all").attr("data-type","false");
+            $(".checkbox").each(function(){
+                $(this).attr("checked",false);
+                $(this).attr("data-type","false");
+            });
+        }
+    }
+    
+    
+    function allid(){
+        var data = new Array();
+        var ids = '';
+        var length = 0;
+        $(".checkbox").each(function(){
+        if($(this).attr("data-type") === "true"){
+        ids += $(this).val()+ ',';
+        length++;
+        }
+        });
+        data['ids'] = ids.substring(0,ids.length-1);
+        data['length'] = length;
+        return data;
+    }
+    
+    function del(){
+        var data = new Array();
+        data=allid();
+        console.log(data);
+        if(data['length']){
+            $.ajax({
+                type: "POST",
+                dataType: "json",
+                url:'plugin.php?id=bc_jiedai:bc_jiedai&mod=delete',
+                data:"data=" + data['ids'],
+                error: function (XMLHttpRequest, textStatus, errorThrown) {
+                    alert('提交数据失败,请刷新后操作');
+                },
+                success: function (msg){
+                    if(msg==1){
+                        history.go(0);
+                    }else if(msg<0){
+                        alert("删除失败！");
+                    }
+                }
+            });
+        }else{
+            alert("请选择数据删除");
+        }
+        
+    }
+
+</script>
+
+</body>
+</html>
